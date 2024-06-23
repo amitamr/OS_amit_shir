@@ -8,7 +8,7 @@
 // Parameters: pointer to jobs, command string
 // Returns: 0 - success,1 - failure
 //**************************************************************************************
-int ExeCmd(Manager manager, char* lineSize, char* cmdString)
+int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 {
 	char* cmd; 
 	char* args[MAX_ARG];
@@ -34,8 +34,14 @@ int ExeCmd(Manager manager, char* lineSize, char* cmdString)
 /*************************************************/
 	if (!strcmp(cmd, "cd")) 
 	{
-		if(num_arg > 1){
+		// need to check with GAL what is considered as old path if the argument is the current pwd
+		if(num_arg > 1){//wrong arguments, error
 			perror("smash error: cd: too many arguments");
+			return 1;
+		}
+		char current_pwd[MAX_LINE_SIZE] = ""; // saving the current cwd for later
+		if(NULL == getcwd(current_pwd, sizeof(current_pwd))){
+			perror("smash error: getcwd failed");
 			return 1;
 		}
 		if(num_arg){ //num arg == 1
@@ -44,12 +50,12 @@ int ExeCmd(Manager manager, char* lineSize, char* cmdString)
 					perror("smash error: cd: OLDPWD not set");
 					return 1;
 				}
-				if(chdir(manager.old_path)){ //error
+				if(chdir(manager.old_path)){ //here we change dir to old pwd (if success)
 					perror("smash error: chdir failed");
 					return 1;
 				}
 			}
-			else if(chdir(arg[1])){ //error
+			else if(chdir(arg[1])){
 					perror("smash error: chdir failed");
 					return 1;
 			}
@@ -57,14 +63,15 @@ int ExeCmd(Manager manager, char* lineSize, char* cmdString)
 		else{// num args == 0
 			const char *home = getenv("HOME");
 			if (NULL == home){
-				perror("smash error: chdir failed");
+				perror("smash error: getenv failed");
 				return 1;
 			}
 			else (chdir(home)){ //error
-					perror("smash error: chdir failed");
+					perror("smash error: chdir failed (home)");
 					return 1;
 			}
-		}	
+		}
+		strcpy(manager.old_path, (const)current_pwd); // change old_path after secceed with cd
 	} 
 	
 	/*************************************************/
@@ -327,18 +334,54 @@ int ExeComp(char* lineSize)
 // Parameters: command string, pointer to jobs
 // Returns: 0- BG command -1- if not
 //**************************************************************************************
-int BgCmd(char* lineSize, void* jobs)
+int BgCmd(char* lineSize, Manager& manager)
 {
-
-	char* Command;
+	char* cmd;
 	char* delimiters = " \t\n";
 	char *args[MAX_ARG];
 	if (lineSize[strlen(lineSize)-2] == '&')
 	{
 		lineSize[strlen(lineSize)-2] = '\0';
-		
-		
+		int i = 0, num_arg = 0;
+		cmd = strtok(lineSize, delimiters);
+		if (cmd == NULL){
+			return 0;
+		}
+   		args[0] = cmd;
+		for (i=1; i<MAX_ARG; i++){
+			args[i] = strtok(NULL, delimiters); 
+			if (args[i] != NULL){
+				num_arg++;
+			}
+		}
+		if(is_built_in(cmd)){
+			return -1;		
+		}
+
+		int pID;
+    	switch(pID = fork()) 
+		{
+    		case -1: 
+					perror("smash error: fork failed");
+					exit(1);
+        	case 0 :
+                	// Child Process
+               		setpgrp();
+					if(execv(cmdString, args) == -1){
+						perror("smash error: execv failed");
+						exit(1);
+					}
+			default:
+				// delete jobs that finished - add function here
+				manager.addjob(cmd, pID);
+	}
+	return 0;
 	}
 	return -1;
 }
 
+bool is_built_in(char* cmd){
+	return (!strcmp(cmd, "cd") || !strcmp(cmd, "kill") || !strcmp(cmd, "diff") || 
+			!strcmp(cmd, "fg") || !strcmp(cmd, "bg") || !strcmp(cmd, "showpid") || !strcmp(cmd, "pwd") || 
+			!strcmp(cmd, "jobs") || !strcmp(cmd, "quit"));
+}
