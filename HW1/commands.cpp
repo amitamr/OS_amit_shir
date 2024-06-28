@@ -1,6 +1,6 @@
 //		commands.c
 //********************************************
-#include "commands.hpp"
+#include "commands.h"
 
 //********************************************
 // function name: ExeCmd
@@ -185,9 +185,10 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 			std::cerr << "smash error: fg: job-id " << jobid << " does not exist" << std::endl;
 			return 1;
 		}
-
-		int pid_fg = manager.jobs[jobindex].pid;
-		std::cout << manager.jobs[jobindex].name << " : " << pid_fg << std::endl;
+		
+		manager.curr_foreground_pid = manager.jobs[jobindex].pid;
+		strcpy(manager.curr_foreground_cmd, manager.jobs[jobindex].name);
+		std::cout << manager.jobs[jobindex].name << " : " << manager.curr_foreground_pid << std::endl;
 		if(kill(pid_fg, SIGCONT) == -1){
 			perror("smash error: kill failed");
 			return 1;
@@ -197,6 +198,7 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 			perror("smash error: waitpid failed");
 			return 1;
 		}
+		manager.curr_foreground_pid = getpid();
 
 	} 
 	/*************************************************/
@@ -285,6 +287,7 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 void ExeExternal(char *args[MAX_ARG], char* cmdString)
 {
 	int pID;
+	strcpy(manager.curr_foreground_cmd, cmdString);
     	switch(pID = fork()) 
 	{
     		case -1: 
@@ -301,11 +304,13 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString)
 					}
 			
 			default:
+				manager.curr_foreground_pid = pID;
                 	// Add your code here
 				if(wait(pID) == -1){
 					perror("smash error: wait failed");
 					exit(1);
 				}
+				manager.curr_foreground_pid = getpid();
 	}
 }
 //**************************************************************************************

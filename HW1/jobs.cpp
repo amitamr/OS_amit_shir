@@ -14,8 +14,9 @@ Job::Job(char* new_name, int new_pid, int new_jobid): is_stopped(0), pid(new_pid
     }
 } 
 
-Manager::Manager(): max_jobid(0), max_stopped_jobid(0), jobsCount(0){ 
+Manager::Manager(): max_jobid(0), max_stopped_jobid(0), jobsCount(0), curr_foreground_pid(0){ 
      std::memset(old_path, 0, sizeof(old_path));
+     std::memset(curr_foreground_cmd, 0, sizeof(curr_foreground));
      std::vector<Job> jobs;
 }
 

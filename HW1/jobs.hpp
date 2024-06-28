@@ -37,6 +37,8 @@ int max_jobid;
 int max_stopped_jobid;
 int jobsCount;
 string old_path;
+string curr_foreground_cmd;
+int curr_foreground_pid; 
 
 // constructor
 Manager();
