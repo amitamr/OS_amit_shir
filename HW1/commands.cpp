@@ -1,6 +1,6 @@
 //		commands.c
 //********************************************
-#include "commands.h"
+#include "commands.hpp"
 
 //********************************************
 // function name: ExeCmd
@@ -32,6 +32,7 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 // ARE IN THIS CHAIN OF IF COMMANDS. PLEASE ADD
 // MORE IF STATEMENTS AS REQUIRED
 /*************************************************/
+	manager.deletefinished();
 	if (!strcmp(cmd, "cd")) 
 	{
 		// need to check with GAL what is considered as old path if the argument is the current pwd
@@ -146,6 +147,9 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 	{	//check for ended processes
 		time_t curr_time;
 		time(&curr_time);
+		//first, delete all finished jobs
+		manager.deletefinished();
+		//now sort for printing
  		std::sort(manager.jobs.begin(), manager.jobs.end(), compareByJobID);
 		for(int i=0; i < manager.jobsCount; i++){
 			std::cout << "[" << manager.jobs[i].jobid << "] " << manager.jobs[i].name << ": " 
@@ -189,6 +193,7 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 		manager.curr_foreground_pid = manager.jobs[jobindex].pid;
 		strcpy(manager.curr_foreground_cmd, manager.jobs[jobindex].name);
 		std::cout << manager.jobs[jobindex].name << " : " << manager.curr_foreground_pid << std::endl;
+		// Amit - who is pid_fg? where did we initialize it?
 		if(kill(pid_fg, SIGCONT) == -1){
 			perror("smash error: kill failed");
 			return 1;
@@ -198,7 +203,9 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 			perror("smash error: waitpid failed");
 			return 1;
 		}
+		/*Amit: is this for saving the smash pid now?*/
 		manager.curr_foreground_pid = getpid();
+		getcwd(manager.curr_foreground_cmd, sizeof(manager.curr_foreground_cmd));
 
 	} 
 	/*************************************************/
@@ -287,7 +294,6 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 void ExeExternal(char *args[MAX_ARG], char* cmdString)
 {
 	int pID;
-	strcpy(manager.curr_foreground_cmd, cmdString);
     	switch(pID = fork()) 
 	{
     		case -1: 
@@ -304,13 +310,17 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString)
 					}
 			
 			default:
+				/*new process in forground so we need to update*/
 				manager.curr_foreground_pid = pID;
+				strcpy(manager.curr_foreground_cmd, cmdString);
                 	// Add your code here
 				if(wait(pID) == -1){
 					perror("smash error: wait failed");
 					exit(1);
 				}
 				manager.curr_foreground_pid = getpid();
+				getcwd(manager.curr_foreground_cmd, sizeof(manager.curr_foreground_cmd));
+
 	}
 }
 //**************************************************************************************
@@ -378,7 +388,8 @@ int BgCmd(char* lineSize, Manager& manager)
 					}
 			default:
 				// delete jobs that finished - add function here
-				manager.addjob(cmd, pID);
+				manager.deletefinished();
+				manager.addjob(cmd, pID, 0); //0 is for is_stopped=0
 	}
 	return 0;
 	}
