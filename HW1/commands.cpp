@@ -35,7 +35,6 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 	manager.deletefinished();
 	if (!strcmp(cmd, "cd")) 
 	{
-		// need to check with GAL what is considered as old path if the argument is the current pwd
 		if(num_arg > 1){//wrong arguments, error
 			perror("smash error: cd: too many arguments");
 			return 1;

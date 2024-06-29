@@ -2,11 +2,12 @@
 //********************************************
 #include "jobs.hpp"
 
+
 bool Job::comapreByJobID(const Job &a, const Job &b){
     return a.jobid < b.jobid;
 }
 
-Job::Job(char* new_name, int new_pid, int new_jobid): is_stopped(0), pid(new_pid), jobid(new_jobid){
+Job::Job(char* new_name, int new_pid, int new_jobid, bool new_is_stopped): is_stopped(new_is_stopped), pid(new_pid), jobid(new_jobid){
     strcpy(name, new_name);
     if(time_t(&entrence_time) == -1){
         perror("smash error: time failed");
@@ -14,9 +15,9 @@ Job::Job(char* new_name, int new_pid, int new_jobid): is_stopped(0), pid(new_pid
     }
 } 
 
-Manager::Manager(): max_jobid(0), max_stopped_jobid(0), jobsCount(0), curr_foreground_pid(0){ 
+Manager::Manager(): max_jobid(0), max_stopped_jobid(0), jobsCount(0), curr_foreground_pid(0), smash_pid(0){ 
      std::memset(old_path, 0, sizeof(old_path));
-     std::memset(curr_foreground_cmd, 0, sizeof(curr_foreground));
+     std::memset(curr_foreground_cmd, 0, sizeof(curr_foreground_cmd));
      std::vector<Job> jobs;
 }
 
@@ -32,10 +33,14 @@ void Manager::erasejob(int jobid){
     jobsCount --;
     std::vector<Job>::iterator it;
     while(it != jobs.end()){
-        it->jobid == jobid;
-        break;
+        if(it->jobid == jobid){
+            break;
+        };
     }
+    /*because its a function for managing jobs, we're not supposed to not find the jobid, so we can
+    just erase it after getting out of the while loop*/
     jobs.erase(it);
+    /*update mas values*/
     int curr_max = 0;
     int curr_stopped_max = 0;
     if(jobid == max_jobid){//update max job id
@@ -44,6 +49,7 @@ void Manager::erasejob(int jobid){
                 curr_max = jobs[i].jobid;
             }
         }
+    max_jobid = curr_max;
     }
     if(jobid == max_stopped_jobid){//update max job id 
          for(int i = 0; i < jobsCount; i++ ){
@@ -51,13 +57,17 @@ void Manager::erasejob(int jobid){
                 curr_stopped_max = jobs[i].jobid;
             }
         }
-    }
-    max_jobid = curr_max;
     max_stopped_jobid = curr_stopped_max;
+    }
 }
-void Manager::addjob(char* new_name, int new_pid){
+
+void Manager::addjob(char* new_name, int new_pid, bool new_is_stopped){
+    //what we shall do if there more then 100 processes? waiting for answer
+    /*if(jobsCount == 100){
+        return
+    }*/ 
     int new_jobid = max_jobid+1;
-    jobs.push_back(Job(new_name, new_pid, new_jobid));
+    jobs.push_back(Job(new_name, new_pid, new_jobid, new_is_stopped));
     max_jobid = new_jobid;
     jobsCount++;
 }
@@ -76,7 +86,7 @@ void Manager::deletefinished(){
 		}else if(retval != 0){
             int jobid_to_delete = it->jobid;
             int curr_max = 0;
-            it = job_list->erase(it); //job is finished, now 'it' pointes to the next element
+            it = jobs.erase(it); //job is finished, now 'it' pointes to the next element
             jobsCount--;
             if(jobid_to_delete==max_jobid){//update max job id
                     for(int i = 0; i < jobsCount; i++ ){
@@ -84,10 +94,12 @@ void Manager::deletefinished(){
                             curr_max = jobs[i].jobid;
                          }
                         }
-                    max_jobid = curr_max;
-                     }
+            }
+            if(0!=curr_max){
+                max_jobid = curr_max;
+            }
 		}else{
-			it++;
+			it++; //job didnt finish, just moving forward "it"
 		}	
 	}
 }

@@ -10,7 +10,7 @@
 #include <signal.h>
 
 void Ctrl_C_handler(Manager& manager);
-void Ctrl_Z_handler(Manager& manager)
+void Ctrl_Z_handler(Manager& manager);
 
 #endif
 

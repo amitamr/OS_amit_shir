@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <sys/wait.h>
+#include <unistd.h> 
+
 #define MAX_LINE_SIZE 80
 #define MAX_ARG 20
 
@@ -21,7 +24,7 @@ public:
    // bool signals[SIGSIZE];
 
 // constructor
-    Job(char* new_name, int new_pid, int new_jobid);
+    Job(char* new_name, int new_pid, int new_jobid, bool new_is_stopped);
 // distractor
     ~Job();
 bool comapreByJobID(const Job &a, const Job &b);
@@ -36,8 +39,11 @@ std::vector<Job> jobs;
 int max_jobid;
 int max_stopped_jobid;
 int jobsCount;
-string old_path;
-string curr_foreground_cmd;
+//string old_path;
+char old_path[MAX_LINE_SIZE];
+//string curr_foreground_cmd;
+char curr_foreground_cmd[MAX_LINE_SIZE];
+int smash_pid; 
 int curr_foreground_pid; 
 
 // constructor
@@ -47,6 +53,8 @@ Manager();
 
 int find(int jobid);
 void erasejob(int jobid);
+void Manager::addjob(char* new_name, int new_pid, bool new_is_stopped);
+void Manager::deletefinished();
 };
 
 #endif
