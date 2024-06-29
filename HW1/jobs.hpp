@@ -1,10 +1,13 @@
 #ifndef JOB_H
 #define JOB_H
 
+#include <stdio.h>
 #include <time.h>
 #include <string>
+#include <cstring>
 #include <vector>
 #include <iostream>
+#include <algorithm>
 #include <sys/wait.h>
 #include <unistd.h> 
 
@@ -27,10 +30,8 @@ public:
     Job(char* new_name, int new_pid, int new_jobid, bool new_is_stopped);
 // distractor
     ~Job();
-bool comapreByJobID(const Job &a, const Job &b);
 /*need to add here methods of class Job*/
 };
-
 
 /*this class is the job's manager of the smash*/
 class Manager{
@@ -42,9 +43,9 @@ int jobsCount;
 //string old_path;
 char old_path[MAX_LINE_SIZE];
 //string curr_foreground_cmd;
-char curr_foreground_cmd[MAX_LINE_SIZE];
-int smash_pid; 
 int curr_foreground_pid; 
+int smash_pid; 
+char curr_foreground_cmd[MAX_LINE_SIZE];
 
 // constructor
 Manager();
@@ -53,8 +54,8 @@ Manager();
 
 int find(int jobid);
 void erasejob(int jobid);
-void Manager::addjob(char* new_name, int new_pid, bool new_is_stopped);
-void Manager::deletefinished();
+void addjob(char* new_name, int new_pid, bool new_is_stopped);
+void deletefinished();
 };
 
 #endif

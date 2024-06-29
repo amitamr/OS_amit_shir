@@ -3,11 +3,9 @@
 #include "jobs.hpp"
 
 
-bool Job::comapreByJobID(const Job &a, const Job &b){
-    return a.jobid < b.jobid;
-}
 
-Job::Job(char* new_name, int new_pid, int new_jobid, bool new_is_stopped): is_stopped(new_is_stopped), pid(new_pid), jobid(new_jobid){
+
+Job::Job(char* new_name, int new_pid, int new_jobid, bool new_is_stopped): jobid(new_jobid), pid(new_pid), is_stopped(new_is_stopped){
     strcpy(name, new_name);
     if(time_t(&entrence_time) == -1){
         perror("smash error: time failed");
@@ -15,11 +13,15 @@ Job::Job(char* new_name, int new_pid, int new_jobid, bool new_is_stopped): is_st
     }
 } 
 
+Job::~Job(){};
+
 Manager::Manager(): max_jobid(0), max_stopped_jobid(0), jobsCount(0), curr_foreground_pid(0), smash_pid(0){ 
      std::memset(old_path, 0, sizeof(old_path));
      std::memset(curr_foreground_cmd, 0, sizeof(curr_foreground_cmd));
      std::vector<Job> jobs;
 }
+
+Manager::~Manager(){};
 
 int Manager::find(int jobtofind){ // if the job found in Jobs returns it's index, else return -1
     for(int i = 0; i < jobsCount; i++ ){
@@ -103,3 +105,4 @@ void Manager::deletefinished(){
 		}	
 	}
 }
+

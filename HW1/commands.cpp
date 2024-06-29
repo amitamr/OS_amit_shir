@@ -8,14 +8,18 @@
 // Parameters: pointer to jobs, command string
 // Returns: 0 - success,1 - failure
 //**************************************************************************************
+bool compareByJobID(const Job &a, const Job &b){
+    return a.jobid < b.jobid;
+}
+
 int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 {
 	char* cmd; 
 	char* args[MAX_ARG];
 	char pwd[MAX_LINE_SIZE]; // for pwd built in commands
-	char* delimiters = " \t\n";  
+	const char* delimiters = " \t\n";  
 	int i = 0, num_arg = 0;
-	bool illegal_cmd = FALSE; // illegal command
+	//bool illegal_cmd = FALSE; // illegal command
     	cmd = strtok(lineSize, delimiters);
 	if (cmd == NULL)
 		return 0; 
@@ -45,7 +49,7 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 			return 1;
 		}
 		if(num_arg){ //num arg == 1
-			if(!strcmp(arg[1],"-")){
+			if(!strcmp(args[1],"-")){
 				if(NULL == manager.old_path){
 					perror("smash error: cd: OLDPWD not set");
 					return 1;
@@ -55,7 +59,7 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 					return 1;
 				}
 			}
-			else if(chdir(arg[1])){
+			else if(chdir(args[1])){
 					perror("smash error: chdir failed");
 					return 1;
 			}
@@ -66,12 +70,12 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 				perror("smash error: getenv failed");
 				return 1;
 			}
-			else (chdir(home)){ //error
+			else if(chdir(home)){ //error
 					perror("smash error: chdir failed (home)");
 					return 1;
 			}
 		}
-		strcpy(manager.old_path, (const)current_pwd); // change old_path after secceed with cd
+		strcpy(manager.old_path, current_pwd); // change old_path after secceed with cd
 	} 
 	
 	/*************************************************/
@@ -89,13 +93,12 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 	/*************************************************/
 	else if (!strcmp(cmd, "kill"))
 	{
-		if(num_arg != 2 || args[1].compare(0,1,"-")!=0){
+		if(num_arg != 2 || strncmp(args[1], "-", 1) != 0){
 			perror("smash error: kill: invalid arguments");
 			return 1;
 		}
 		int jobid = atoi(args[2]);
-		(string)args[1].erase(args[1].begin()); // if fails do varible of string and then string.c_str
-		int signum = atoi(args[1]);
+		int signum = atoi(args[1]+1);
 
 		if(jobid == 0 || signum == 0) 
 		{
@@ -152,7 +155,7 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
  		std::sort(manager.jobs.begin(), manager.jobs.end(), compareByJobID);
 		for(int i=0; i < manager.jobsCount; i++){
 			std::cout << "[" << manager.jobs[i].jobid << "] " << manager.jobs[i].name << ": " 
-							 <<manager.jobs[i].pid << " " << `time(curr_time,manager.jobs[i].entrence_time) 
+							 <<manager.jobs[i].pid << " " << difftime(curr_time,manager.jobs[i].entrence_time) 
 							 << " secs" ;
 			if(manager.jobs[i].is_stopped){
 				std::cout << " (stopped)";
@@ -163,7 +166,7 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 	/*************************************************/
 	else if (!strcmp(cmd, "showpid")) 
 	{
-		std::cout << smash pid is << getpid() << std::endl;
+		std::cout << "smash pid is" << getpid() << std::endl;
 	}
 	/*************************************************/
 	else if (!strcmp(cmd, "fg")) 
@@ -192,17 +195,15 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 		manager.curr_foreground_pid = manager.jobs[jobindex].pid;
 		strcpy(manager.curr_foreground_cmd, manager.jobs[jobindex].name);
 		std::cout << manager.jobs[jobindex].name << " : " << manager.curr_foreground_pid << std::endl;
-		// Amit - who is pid_fg? where did we initialize it?
-		if(kill(pid_fg, SIGCONT) == -1){
+		if(kill(manager.curr_foreground_pid, SIGCONT) == -1){
 			perror("smash error: kill failed");
 			return 1;
 		}
 		manager.erasejob(jobid);
-		if(waitpid(pid_fg, NULL, WUNTRACED) == -1){
+		if(waitpid(manager.curr_foreground_pid, NULL, WUNTRACED) == -1){
 			perror("smash error: waitpid failed");
 			return 1;
 		}
-		/*Amit: is this for saving the smash pid now?*/
 		manager.curr_foreground_pid = getpid();
 		getcwd(manager.curr_foreground_cmd, sizeof(manager.curr_foreground_cmd));
 
@@ -262,9 +263,9 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 			sleep(5);				
 			if(waitpid(it->pid,NULL,WNOHANG) == 0){
 				std::cout << " (5 sec passed) Sending SIGKILL...";
-				if(kill(it->pid, SIGKILL) == ERROR){
+				if(kill(it->pid, SIGKILL) == -1){
 					perror("smash error: kill failed");
-					return FAILURE;
+					return 1;
 				}
 			}
 			std::cout << " Done." << std::endl;
@@ -274,13 +275,8 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 	/*************************************************/
 	else // external command
 	{
- 		ExeExternal(args, cmd);
+ 		ExeExternal(args, cmd, manager);
 	 	return 0;
-	}
-	if (illegal_cmd == TRUE)
-	{
-		perror("smash error: > \"%s\"\n", cmdString);
-		return 1;
 	}
     return 0;
 }
@@ -290,7 +286,7 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 // Parameters: external command arguments, external command string
 // Returns: void
 //**************************************************************************************
-void ExeExternal(char *args[MAX_ARG], char* cmdString)
+void ExeExternal(char *args[MAX_ARG], char* cmdString, Manager& manager)
 {
 	int pID;
     	switch(pID = fork()) 
@@ -313,7 +309,7 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString)
 				manager.curr_foreground_pid = pID;
 				strcpy(manager.curr_foreground_cmd, cmdString);
                 	// Add your code here
-				if(wait(pID) == -1){
+				if(waitpid(pID, NULL, WUNTRACED | WCONTINUED) == -1){
 					perror("smash error: wait failed");
 					exit(1);
 				}
@@ -322,26 +318,7 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString)
 
 	}
 }
-//**************************************************************************************
-// function name: ExeComp
-// Description: executes complicated command
-// Parameters: command string
-// Returns: 0- if complicated -1- if not
-//**************************************************************************************
-int ExeComp(char* lineSize)
-{
-	char ExtCmd[MAX_LINE_SIZE+2];
-	char *args[MAX_ARG];
-    if ((strstr(lineSize, "|")) || (strstr(lineSize, "<")) || (strstr(lineSize, ">")) || (strstr(lineSize, "*")) || (strstr(lineSize, "?")) || (strstr(lineSize, ">>")) || (strstr(lineSize, "|&")))
-    {
-		// Add your code here (execute a complicated command)
-					
-		/* 
-		your code
-		*/
-	} 
-	return -1;
-}
+
 //**************************************************************************************
 // function name: BgCmd
 // Description: if command is in background, insert the command to jobs
@@ -351,7 +328,7 @@ int ExeComp(char* lineSize)
 int BgCmd(char* lineSize, Manager& manager)
 {
 	char* cmd;
-	char* delimiters = " \t\n";
+	const char* delimiters = " \t\n";
 	char *args[MAX_ARG];
 	if (lineSize[strlen(lineSize)-2] == '&')
 	{
@@ -381,7 +358,7 @@ int BgCmd(char* lineSize, Manager& manager)
         	case 0 :
                 	// Child Process
                		setpgrp();
-					if(execv(cmdString, args) == -1){
+					if(execv(cmd, args) == -1){
 						perror("smash error: execv failed");
 						exit(1);
 					}

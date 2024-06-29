@@ -9,8 +9,8 @@
 #include <string.h>
 #include <signal.h>
 
-void Ctrl_C_handler(Manager& manager);
-void Ctrl_Z_handler(Manager& manager);
+void Ctrl_C_handler(int signal);
+void Ctrl_Z_handler(int signal);
 
 #endif
 

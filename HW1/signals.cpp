@@ -8,7 +8,9 @@
 #include "signals.hpp"
 
 
-void Ctrl_C_handler(Manager& manager){
+extern Manager manager;
+
+void Ctrl_C_handler(int signal){
    std::cout << "smash: caught ctrl-C" << std::endl;
    //check that it's not the smash process
    if(manager.curr_foreground_pid != manager.smash_pid){
@@ -20,11 +22,11 @@ void Ctrl_C_handler(Manager& manager){
          manager.curr_foreground_pid = manager.smash_pid;
          getcwd(manager.curr_foreground_cmd, sizeof(manager.curr_foreground_cmd));
       }
-      
+
    }
 }
 
-void Ctrl_Z_handler(Manager& manager){
+void Ctrl_Z_handler(int signal){
    std::cout << "smash: caught ctrl-Z" << std::endl;
    if(manager.curr_foreground_pid != manager.smash_pid){
       if(kill(manager.curr_foreground_pid , SIGSTOP) == -1 ){

@@ -25,15 +25,15 @@ char lineSize[MAX_LINE_SIZE];
 int main(int argc, char *argv[])
 {
     char cmdString[MAX_LINE_SIZE]; 	   
-	Manager manager;
 	manager.smash_pid = getpid();
 	manager.curr_foreground_pid = getpid();
 	//signal declaretions
 	//NOTE: the signal handlers and the function/s that sets the handler should be found in siganls.c
 	 /* add your code here */
 	struct sigaction ctrlC, ctrlZ;
-	ctrlC.sa_handler = &ctrl_c_handler;
-	ctrlZ.sa_handler = &ctrl_z_handler;
+	//ctrlC.sa_handler = [&manager](int sig) { Ctrl_C_handler(manager); }; // Lambda to pass manager to Ctrl_C_handler
+	ctrlC.sa_handler = &Ctrl_C_handler;
+	ctrlZ.sa_handler = &Ctrl_Z_handler;
 
 	ctrlC.sa_flags = SA_RESTART;
 	ctrlZ.sa_flags = SA_RESTART;
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 		strcpy(cmdString, lineSize);    	
 		cmdString[strlen(lineSize)-1]='\0';
 					// background command	
-	 	if(!BgCmd(lineSize, jobs)) continue; 
+	 	if(!BgCmd(lineSize, manager)) continue; 
 					// built in commands
 		ExeCmd(manager, lineSize, cmdString);
 		/* initialize for next line read*/
