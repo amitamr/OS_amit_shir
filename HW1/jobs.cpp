@@ -34,10 +34,12 @@ int Manager::find(int jobtofind){ // if the job found in Jobs returns it's index
 void Manager::erasejob(int jobid){
     jobsCount --;
     std::vector<Job>::iterator it;
+    it = jobs.begin();
     while(it != jobs.end()){
         if(it->jobid == jobid){
             break;
         }
+        it++;
     }
     /*because its a function for managing jobs, we're not supposed to not find the jobid, so we can
     just erase it after getting out of the while loop*/
