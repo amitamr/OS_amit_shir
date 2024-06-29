@@ -9,7 +9,7 @@ main file. This file contains the main function of smash
 #include <string.h>
 #include <signal.h>
 #include "commands.hpp"
-#include "signals.h"
+#include "signals.hpp"
 #include "jobs.hpp"
 #define MAX_LINE_SIZE 80
 #define MAXARGS 20
@@ -25,20 +25,24 @@ char lineSize[MAX_LINE_SIZE];
 int main(int argc, char *argv[])
 {
     char cmdString[MAX_LINE_SIZE]; 	   
-	manager.max_jobid = 0;
-	manager.old_path = null;
-	manager.jobsCount = 0;
-	
+	Manager manager;
+	manager.smash_pid = getpid();
+	manager.curr_foreground_pid = getpid();
 	//signal declaretions
 	//NOTE: the signal handlers and the function/s that sets the handler should be found in siganls.c
 	 /* add your code here */
-	
+	struct sigaction ctrlC, ctrlZ;
+	ctrlC.sa_handler = &ctrl_c_handler;
+	ctrlZ.sa_handler = &ctrl_z_handler;
+
+	ctrlC.sa_flags = SA_RESTART;
+	ctrlZ.sa_flags = SA_RESTART;
 	/************************************/
 	//NOTE: the signal handlers and the function/s that sets the handler should be found in siganls.c
 	//set your signal handlers here
-	/* add your code here */
 
-	/************************************/
+    sigaction(SIGINT, &ctrlC, NULL);
+    sigaction(SIGTSTP, &ctrlZ, NULL);
 
 	/************************************/
 	// Init globals 
@@ -55,13 +59,10 @@ int main(int argc, char *argv[])
 		fgets(lineSize, MAX_LINE_SIZE, stdin);
 		strcpy(cmdString, lineSize);    	
 		cmdString[strlen(lineSize)-1]='\0';
-					// perform a complicated Command
-		if(!ExeComp(lineSize)) continue; 
 					// background command	
 	 	if(!BgCmd(lineSize, jobs)) continue; 
 					// built in commands
 		ExeCmd(manager, lineSize, cmdString);
-		
 		/* initialize for next line read*/
 		lineSize[0]='\0';
 		cmdString[0]='\0';
