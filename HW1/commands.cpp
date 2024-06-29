@@ -40,7 +40,7 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 	if (!strcmp(cmd, "cd")) 
 	{
 		if(num_arg > 1){//wrong arguments, error
-			perror("smash error: cd: too many arguments");
+			std::cerr << "smash error: cd: too many arguments" << std::endl;
 			return 1;
 		}
 		char current_pwd[MAX_LINE_SIZE] = ""; // saving the current cwd for later
@@ -51,7 +51,7 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 		if(num_arg){ //num arg == 1
 			if(!strcmp(args[1],"-")){
 				if(!strcmp("", manager.old_path)){
-					perror("smash error: cd: OLDPWD not set");
+					std::cerr << "smash error: cd: OLDPWD not set" << std::endl;
 					return 1;
 				}
 				if(chdir(manager.old_path)){ //here we change dir to old pwd (if success)
@@ -85,7 +85,7 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 			std::cout << pwd << std::endl;
 		}
 		else{
-			perror("smash error: pwd failed");
+			perror("smash error: getcwd failed");
 			return 1;
 		}
 	}
@@ -94,7 +94,7 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 	else if (!strcmp(cmd, "kill"))
 	{
 		if(num_arg != 2 || strncmp(args[1], "-", 1) != 0){
-			perror("smash error: kill: invalid arguments");
+			std::cerr << "smash error: kill: invalid arguments" << std::endl;
 			return 1;
 		}
 		int jobid = atoi(args[2]);
@@ -103,7 +103,7 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 		if(jobid == 0 || signum == 0) 
 		{
 		//at least one argument is not an integer
-			perror("smash error: kill: invalid arguments");
+			std::cerr << "smash error: kill: invalid arguments" << std::endl;
 			return 1;
 		}
 		int jobindex = manager.find(jobid);
@@ -120,7 +120,7 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 	else if (!strcmp(cmd, "diff"))
 	{
 		if(num_arg != 2){
-			perror("smash error: diff: invalid arguments");
+			std::cerr << "smash error: diff: invalid arguments" <<std::endl;
 			return 1;
 		}
  		FILE *fp1 = fopen(args[1], "r");
@@ -173,11 +173,11 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 	{
 		int jobid = atoi (args[1]);
 		if(num_arg > 1 || jobid == 0){ // format or num arguments are invalid
-			perror("smash error: fg: invalid arguments");
+			std::cerr << "smash error: fg: invalid arguments" << std::endl;
 			return 1;
 		}
 		if(num_arg == 0 && manager.jobsCount == 0){
-			perror("smash error: fg: jobs list is empty");
+			std::cerr << "smash error: fg: jobs list is empty" <<std::endl;
 			return 1;
 		}
 		int jobindex;
@@ -213,11 +213,11 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 	{
   		int jobid = atoi (args[1]);
 		if(num_arg > 1 || jobid == 0){ // format or num arguments are invalid
-			perror("smash error: bg: invalid arguments");
+			std::cerr << "smash error: bg: invalid arguments" << std::endl;
 			return 1;
 		}
 		if(num_arg == 0 && manager.max_stopped_jobid == 0){ //no stopped jobs
-			perror("smash error: bg: there are no stopped jobs to resume");
+			std::cerr << "smash error: bg: there are no stopped jobs to resume" << std::endl;
 			return 1;
 		}
 		int jobindex;

@@ -37,7 +37,7 @@ void Manager::erasejob(int jobid){
     while(it != jobs.end()){
         if(it->jobid == jobid){
             break;
-        };
+        }
     }
     /*because its a function for managing jobs, we're not supposed to not find the jobid, so we can
     just erase it after getting out of the while loop*/
