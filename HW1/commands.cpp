@@ -171,15 +171,17 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 	/*************************************************/
 	else if (!strcmp(cmd, "fg")) 
 	{
+		if(num_arg == 0 && manager.jobsCount == 0){
+
+			std::cerr << "smash error: fg: jobs list is empty" <<std::endl;
+			return 1;
+		}
 		int jobid = atoi (args[1]);
 		if(num_arg > 1 || jobid == 0){ // format or num arguments are invalid
 			std::cerr << "smash error: fg: invalid arguments" << std::endl;
 			return 1;
 		}
-		if(num_arg == 0 && manager.jobsCount == 0){
-			std::cerr << "smash error: fg: jobs list is empty" <<std::endl;
-			return 1;
-		}
+		
 		int jobindex;
 		if (num_arg == 0){
 			jobindex = manager.find(manager.max_jobid);
@@ -211,15 +213,17 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 	/*************************************************/
 	else if (!strcmp(cmd, "bg")) 
 	{
-  		int jobid = atoi (args[1]);
-		if(num_arg > 1 || jobid == 0){ // format or num arguments are invalid
-			std::cerr << "smash error: bg: invalid arguments" << std::endl;
-			return 1;
-		}
 		if(num_arg == 0 && manager.max_stopped_jobid == 0){ //no stopped jobs
 			std::cerr << "smash error: bg: there are no stopped jobs to resume" << std::endl;
 			return 1;
 		}
+
+		int jobid = atoi (args[1]);
+		if(num_arg > 1 || jobid == 0){ // format or num arguments are invalid
+			std::cerr << "smash error: bg: invalid arguments" << std::endl;
+			return 1;
+		}
+		
 		int jobindex;
 		if (num_arg == 0){
 			jobindex = manager.find(manager.max_stopped_jobid);
