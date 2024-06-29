@@ -50,7 +50,7 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 		}
 		if(num_arg){ //num arg == 1
 			if(!strcmp(args[1],"-")){
-				if(NULL == manager.old_path){
+				if(!strcmp("", manager.old_path)){
 					perror("smash error: cd: OLDPWD not set");
 					return 1;
 				}
@@ -155,7 +155,7 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
  		std::sort(manager.jobs.begin(), manager.jobs.end(), compareByJobID);
 		for(int i=0; i < manager.jobsCount; i++){
 			std::cout << "[" << manager.jobs[i].jobid << "] " << manager.jobs[i].name << ": " 
-							 <<manager.jobs[i].pid << " " << difftime(curr_time,manager.jobs[i].entrence_time) 
+							 <<manager.jobs[i].pid << " " << (int)difftime(curr_time,manager.jobs[i].entrence_time) 
 							 << " secs" ;
 			if(manager.jobs[i].is_stopped){
 				std::cout << " (stopped)";
@@ -166,7 +166,7 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 	/*************************************************/
 	else if (!strcmp(cmd, "showpid")) 
 	{
-		std::cout << "smash pid is" << getpid() << std::endl;
+		std::cout << "smash pid is " << getpid() << std::endl;
 	}
 	/*************************************************/
 	else if (!strcmp(cmd, "fg")) 
@@ -332,6 +332,11 @@ int BgCmd(char* lineSize, Manager& manager)
 	char *args[MAX_ARG];
 	if (lineSize[strlen(lineSize)-2] == '&')
 	{
+		char cmdName[MAX_LINE_SIZE];
+		strcpy(cmdName, lineSize);
+		//cmdName will hold the name including the '&'
+		cmdName[strlen(cmdName)-1] = '\0';
+		// extract command and arguments.
 		lineSize[strlen(lineSize)-2] = '\0';
 		int i = 0, num_arg = 0;
 		cmd = strtok(lineSize, delimiters);
@@ -365,7 +370,7 @@ int BgCmd(char* lineSize, Manager& manager)
 			default:
 				// delete jobs that finished - add function here
 				manager.deletefinished();
-				manager.addjob(cmd, pID, 0); //0 is for is_stopped=0
+				manager.addjob(cmdName, pID, 0); //0 is for is_stopped=0
 	}
 	return 0;
 	}

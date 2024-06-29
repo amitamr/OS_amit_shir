@@ -18,7 +18,7 @@ void Ctrl_C_handler(int signal){
          perror("smash error: kill failed");
       }
       else{
-         std::cout << "smash: process " << manager.curr_foreground_pid << " was killed";
+         std::cout << "smash: process " << manager.curr_foreground_pid << " was killed" << std::endl;
          manager.curr_foreground_pid = manager.smash_pid;
          getcwd(manager.curr_foreground_cmd, sizeof(manager.curr_foreground_cmd));
       }
@@ -35,7 +35,7 @@ void Ctrl_Z_handler(int signal){
       else{
          manager.deletefinished();
          manager.addjob(manager.curr_foreground_cmd, manager.curr_foreground_pid, 1);
-         std::cout << "smash: process " << manager.curr_foreground_pid << " was stopped";
+         std::cout << "smash: process " << manager.curr_foreground_pid << " was stopped" << std::endl;
          manager.curr_foreground_pid = manager.smash_pid;
          getcwd(manager.curr_foreground_cmd, sizeof(manager.curr_foreground_cmd));
       }  

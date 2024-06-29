@@ -13,7 +13,7 @@ Job::Job(char* new_name, int new_pid, int new_jobid, bool new_is_stopped): jobid
     }
 } 
 
-Job::~Job(){};
+Job::~Job(){}
 
 Manager::Manager(): max_jobid(0), max_stopped_jobid(0), jobsCount(0), curr_foreground_pid(0), smash_pid(0){ 
      std::memset(old_path, 0, sizeof(old_path));
@@ -21,7 +21,7 @@ Manager::Manager(): max_jobid(0), max_stopped_jobid(0), jobsCount(0), curr_foreg
      std::vector<Job> jobs;
 }
 
-Manager::~Manager(){};
+Manager::~Manager(){}
 
 int Manager::find(int jobtofind){ // if the job found in Jobs returns it's index, else return -1
     for(int i = 0; i < jobsCount; i++ ){
