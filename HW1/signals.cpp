@@ -48,6 +48,10 @@ void Ctrl_Z_handler(int signal){
          else{
             it->is_fg = 0;
             it->is_stopped = 1;
+            if(time(&(it->entrence_time)) == -1){
+               perror("smash error: time failed");
+		      exit(1);
+            }
             if(manager.max_stopped_jobid < it->jobid){
                manager.max_stopped_jobid = it->jobid;
             }

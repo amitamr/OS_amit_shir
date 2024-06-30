@@ -110,19 +110,23 @@ void Manager::deletefinished(){
             int curr_max = 0;
             it = jobs.erase(it); //job is finished, now 'it' pointes to the next element
             jobsCount--;
-            if(jobid_to_delete==max_jobid){//update max job id
+            if(jobid_to_delete == max_jobid){//update max job id
                     for(int i = 0; i < jobsCount; i++ ){
                         if(curr_max < jobs[i].jobid){
                             curr_max = jobs[i].jobid;
                          }
                         }
             }
-            if(0!=curr_max){
+            if(0 != curr_max){
                 max_jobid = curr_max;
             }
+            
 		}else{
 			it++; //job didnt finish, just moving forward "it"
 		}	
 	}
+    if(jobsCount == 0){
+        max_jobid = 0;
+    }
 }
 
