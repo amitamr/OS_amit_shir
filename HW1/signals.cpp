@@ -18,6 +18,7 @@ void Ctrl_C_handler(int signal){
          perror("smash error: kill failed");
       }
       else{
+         manager.erasejob(manager.curr_foreground_pid);
          std::cout << "smash: process " << manager.curr_foreground_pid << " was killed" << std::endl;
          manager.curr_foreground_pid = manager.smash_pid;
          getcwd(manager.curr_foreground_cmd, sizeof(manager.curr_foreground_cmd));

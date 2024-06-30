@@ -31,18 +31,20 @@ int Manager::find(int jobtofind){ // if the job found in Jobs returns it's index
     return -1;
 }
 
-void Manager::erasejob(int jobid){
+void Manager::erasejob(int pid){
     jobsCount --;
     std::vector<Job>::iterator it;
     it = jobs.begin();
     while(it != jobs.end()){
-        if(it->jobid == jobid){
+        if(it->pid == pid){
             break;
         }
         it++;
     }
-    /*because its a function for managing jobs, we're not supposed to not find the jobid, so we can
-    just erase it after getting out of the while loop*/
+    if(it == jobs.end()) {
+        return;
+    }
+    int jobid = it->jobid;
     jobs.erase(it);
     /*update mas values*/
     int curr_max = 0;
@@ -62,6 +64,9 @@ void Manager::erasejob(int jobid){
             }
         }
     max_stopped_jobid = curr_stopped_max;
+    }
+    if(jobsCount == 0){
+        max_jobid = 0;
     }
 }
 
@@ -99,7 +104,7 @@ void Manager::deletefinished(){
 		return;
 	}
 	std::vector<Job>::iterator it = jobs.begin();
-	while( it!=jobs.end()){
+	while( it != jobs.end()){
 		//If the process has terminated
 		int retval = waitpid(it->pid, NULL, WNOHANG);
 		if(retval == -1){

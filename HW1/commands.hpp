@@ -17,7 +17,7 @@
 bool compareByJobID(const Job &a, const Job &b);
 int BgCmd(char* lineSize, Manager& manager);
 int ExeCmd(Manager& manager, char* lineSize, char* cmdString);
-void ExeExternal(char *args[MAX_ARG], char* cmdString, Manager& manager);
+void ExeExternal(char *args[MAX_ARG], char* cmd, char* cmdString , Manager& manager);
 bool is_built_in(char* cmd);
 #endif
 

@@ -150,11 +150,10 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 		time_t curr_time = time(NULL);
 		//first, delete all finished jobs
 		manager.deletefinished();
-		//now sort for printing
-		//time_t time_passed = 
+		//now sort for printing 
  		std::sort(manager.jobs.begin(), manager.jobs.end(), compareByJobID);
 		for(int i=0; i < manager.jobsCount; i++){
-			std::cout << "[" << manager.jobs[i].jobid << "] " << manager.jobs[i].name << ": " 
+			std::cout << "[" << manager.jobs[i].jobid << "] " << manager.jobs[i].name << " : " 
 							 <<manager.jobs[i].pid << " " << difftime(curr_time,manager.jobs[i].entrence_time) 
 							 << " secs" ;
 			if(manager.jobs[i].is_stopped){
@@ -176,17 +175,17 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 			std::cerr << "smash error: fg: jobs list is empty" <<std::endl;
 			return 1;
 		}
-		int jobid = atoi (args[1]);
-		if(num_arg > 1 || jobid == 0){ // format or num arguments are invalid
-			std::cerr << "smash error: fg: invalid arguments" << std::endl;
-			return 1;
-		}
-		
+		int jobid; 
 		int jobindex;
 		if (num_arg == 0){
 			jobindex = manager.find(manager.max_jobid);
 		}
 		else{
+			jobid = atoi (args[1]);
+			if(num_arg > 1 || jobid == 0){ // format or num arguments are invalid
+				std::cerr << "smash error: fg: invalid arguments" << std::endl;
+				return 1;
+			}
 			jobindex = manager.find(jobid);
 		}
 		if (jobindex == -1){
@@ -279,7 +278,7 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 	/*************************************************/
 	else // external command
 	{
- 		ExeExternal(args, cmd, manager);
+ 		ExeExternal(args, cmd ,cmdString, manager);
 	 	return 0;
 	}
     return 0;
@@ -290,7 +289,7 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 // Parameters: external command arguments, external command string
 // Returns: void
 //**************************************************************************************
-void ExeExternal(char *args[MAX_ARG], char* cmdString, Manager& manager)
+void ExeExternal(char *args[MAX_ARG], char* cmd, char* cmdString , Manager& manager)
 {
 	int pID;
     	switch(pID = fork()) 
@@ -303,7 +302,7 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString, Manager& manager)
                 	// Child Process
                		setpgrp();
 			        // Add your code here (execute an external command)
-					if(execv(cmdString, args) == -1){
+					if(execv(cmd, args) == -1){
 						perror("smash error: execv failed");
 						exit(1);
 					}
