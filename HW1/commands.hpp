@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include "jobs.hpp"
+#include <fcntl.h>
 
 
 #define MAX_LINE_SIZE 80

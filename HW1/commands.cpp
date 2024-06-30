@@ -123,13 +123,45 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 			std::cerr << "smash error: diff: invalid arguments" <<std::endl;
 			return 1;
 		}
- 		FILE *fp1 = fopen(args[1], "r");
-        FILE *fp2 = fopen(args[2], "r");
-		if (fp1 == NULL || fp2 == NULL){
+ 		int file1;
+		int file2;
+		if ((file1 = open(args[1], O_RDONLY)) == -1){
 			perror("smash error: open failed");
 			return 1;
 		}
-		char c1, c2;
+		if ((file2 = open(args[2], O_RDONLY)) == -1){
+			perror("smash error: open failed");
+			return 1;
+		}
+		const size_t bufferSize = 4096;
+    	char buffer1[bufferSize], buffer2[bufferSize];
+    	ssize_t bytesRead1, bytesRead2;
+		do {
+        	bytesRead1 = read(file1, buffer1, bufferSize);
+        	bytesRead2 = read(file2, buffer2, bufferSize);
+
+        	if (bytesRead1 == -1 || bytesRead2 == -1) {
+				perror("smash error: open failed");
+            	close(file1);
+            	close(file2);
+            	return 1;
+        	}
+
+        	if (bytesRead1 != bytesRead2 || memcmp(buffer1, buffer2, bytesRead1) != 0) {
+            	close(file1);
+            	close(file2);
+				std::cout << "1" <<std::endl;
+            	break;  // Files are different
+        }
+    	} while (bytesRead1 > 0 && bytesRead2 > 0);
+	if(bytesRead1 == 0 && bytesRead2 == 0){
+    	close(file1);
+    	close(file2);
+     	std::cout << "0" <<std::endl;// Files are identical
+	}
+}
+
+		/*char c1, c2;
 		while( (c1 = fgetc(fp1)) != EOF && (c2= fgetc(fp2)) != EOF)
 		{
 			if(c1 != c2){
@@ -142,7 +174,8 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 		}
 		else
 			std::cout << "1" <<std::endl;
-	}
+		*/
+	
 	/*************************************************/
 	
 	else if (!strcmp(cmd, "jobs")) 
