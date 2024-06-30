@@ -24,6 +24,7 @@ public:
     bool is_stopped;
     time_t entrence_time;
     char name[MAX_LINE_SIZE];
+    bool is_fg;
    // bool signals[SIGSIZE];
 
 // constructor
@@ -54,6 +55,7 @@ Manager();
 
 int find(int jobid);
 void erasejob(int jobid);
+void move_to_fg(int jobid);
 void addjob(char* new_name, int new_pid, bool new_is_stopped);
 void deletefinished();
 };

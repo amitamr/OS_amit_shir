@@ -34,7 +34,21 @@ void Ctrl_Z_handler(int signal){
       }
       else{
          manager.deletefinished();
-         manager.addjob(manager.curr_foreground_cmd, manager.curr_foreground_pid, 1);
+         std::vector<Job>::iterator it;
+         it = manager.jobs.begin();
+         while(it != manager.jobs.end()){
+         if(it->pid == manager.curr_foreground_pid){
+            break;
+         }
+         it++;
+         }
+         if(it == manager.jobs.end()){
+            manager.addjob(manager.curr_foreground_cmd, manager.curr_foreground_pid, 1);
+         }
+         else{
+            it->is_fg = 0;
+            it->is_stopped = 1;
+         }
          std::cout << "smash: process " << manager.curr_foreground_pid << " was stopped" << std::endl;
          manager.curr_foreground_pid = manager.smash_pid;
          getcwd(manager.curr_foreground_cmd, sizeof(manager.curr_foreground_cmd));

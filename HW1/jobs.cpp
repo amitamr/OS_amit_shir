@@ -5,9 +5,9 @@
 
 
 
-Job::Job(char* new_name, int new_pid, int new_jobid, bool new_is_stopped): jobid(new_jobid), pid(new_pid), is_stopped(new_is_stopped){
+Job::Job(char* new_name, int new_pid, int new_jobid, bool new_is_stopped): jobid(new_jobid), pid(new_pid), is_stopped(new_is_stopped), is_fg(0){
     strcpy(name, new_name);
-    if(time_t(&entrence_time) == -1){
+    if(time(&entrence_time) == -1){
         perror("smash error: time failed");
 		exit(1);
     }
@@ -64,6 +64,21 @@ void Manager::erasejob(int jobid){
     max_stopped_jobid = curr_stopped_max;
     }
 }
+
+void Manager::move_to_fg(int jobid){
+    std::vector<Job>::iterator it;
+    it = jobs.begin();
+    while(it != jobs.end()){
+        if(it->jobid == jobid){
+            break;
+        }
+        it++;
+    }
+    it->is_fg = 1;
+
+}
+
+
 
 void Manager::addjob(char* new_name, int new_pid, bool new_is_stopped){
     //what we shall do if there more then 100 processes? waiting for answer

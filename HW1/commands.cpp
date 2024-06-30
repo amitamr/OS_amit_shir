@@ -147,15 +147,15 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 	
 	else if (!strcmp(cmd, "jobs")) 
 	{	//check for ended processes
-		time_t curr_time;
-		time(&curr_time);
+		time_t curr_time = time(NULL);
 		//first, delete all finished jobs
 		manager.deletefinished();
 		//now sort for printing
+		//time_t time_passed = 
  		std::sort(manager.jobs.begin(), manager.jobs.end(), compareByJobID);
 		for(int i=0; i < manager.jobsCount; i++){
 			std::cout << "[" << manager.jobs[i].jobid << "] " << manager.jobs[i].name << ": " 
-							 <<manager.jobs[i].pid << " " << (int)difftime(curr_time,manager.jobs[i].entrence_time) 
+							 <<manager.jobs[i].pid << " " << difftime(curr_time,manager.jobs[i].entrence_time) 
 							 << " secs" ;
 			if(manager.jobs[i].is_stopped){
 				std::cout << " (stopped)";
@@ -200,8 +200,9 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 		if(kill(manager.curr_foreground_pid, SIGCONT) == -1){
 			perror("smash error: kill failed");
 			return 1;
-		}
-		manager.erasejob(jobid);
+		} 
+		//manager.erasejob(jobid); trying to fix problen of bg -> fg -> bg/stopped
+		manager.move_to_fg(jobid);
 		if(waitpid(manager.curr_foreground_pid, NULL, WUNTRACED) == -1){
 			perror("smash error: waitpid failed");
 			return 1;
