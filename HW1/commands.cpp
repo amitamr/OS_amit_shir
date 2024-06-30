@@ -20,7 +20,8 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 	const char* delimiters = " \t\n";  
 	int i = 0, num_arg = 0;
 	//bool illegal_cmd = FALSE; // illegal command
-    	cmd = strtok(lineSize, delimiters);
+	//std::cout << "-1 " << cmdString[strlen(cmdString)-1] << std::endl;
+    cmd = strtok(lineSize, delimiters);
 	if (cmd == NULL)
 		return 0; 
    	args[0] = cmd;
@@ -373,9 +374,11 @@ int BgCmd(char* lineSize, Manager& manager)
 		//cmdName will hold the name including the '&'
 		cmdName[strlen(cmdName)-1] = '\0';
 		// extract command and arguments.
-		lineSize[strlen(lineSize)-2] = '\0';
+		lineSize[strlen(lineSize)-2] = '\0'; 
+		char linecopy[MAX_LINE_SIZE];
+		strcpy(linecopy,lineSize);
 		int i = 0, num_arg = 0;
-		cmd = strtok(lineSize, delimiters);
+		cmd = strtok(linecopy, delimiters);
 		if (cmd == NULL){
 			return 0;
 		}
@@ -387,6 +390,7 @@ int BgCmd(char* lineSize, Manager& manager)
 			}
 		}
 		if(is_built_in(cmd)){
+			//std::cout << "line size in bg " << lineSize << std::endl;
 			return -1;		
 		}
 
