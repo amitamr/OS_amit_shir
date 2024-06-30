@@ -88,6 +88,9 @@ void Manager::addjob(char* new_name, int new_pid, bool new_is_stopped){
     int new_jobid = max_jobid+1;
     jobs.push_back(Job(new_name, new_pid, new_jobid, new_is_stopped));
     max_jobid = new_jobid;
+    if(new_is_stopped){
+        max_stopped_jobid = new_jobid;
+    }
     jobsCount++;
 }
 

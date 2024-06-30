@@ -48,6 +48,9 @@ void Ctrl_Z_handler(int signal){
          else{
             it->is_fg = 0;
             it->is_stopped = 1;
+            if(manager.max_stopped_jobid < it->jobid){
+               manager.max_stopped_jobid = it->jobid;
+            }
          }
          std::cout << "smash: process " << manager.curr_foreground_pid << " was stopped" << std::endl;
          manager.curr_foreground_pid = manager.smash_pid;

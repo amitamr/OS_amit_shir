@@ -218,18 +218,17 @@ int ExeCmd(Manager& manager, char* lineSize, char* cmdString)
 			std::cerr << "smash error: bg: there are no stopped jobs to resume" << std::endl;
 			return 1;
 		}
-
-		int jobid = atoi (args[1]);
-		if(num_arg > 1 || jobid == 0){ // format or num arguments are invalid
-			std::cerr << "smash error: bg: invalid arguments" << std::endl;
-			return 1;
-		}
-		
 		int jobindex;
+		int jobid;
 		if (num_arg == 0){
 			jobindex = manager.find(manager.max_stopped_jobid);
 		}
 		else{
+			jobid = atoi(args[1]);
+			if(num_arg > 1 || jobid == 0){ // format or num arguments are invalid
+				std::cerr << "smash error: bg: invalid arguments" << std::endl;
+				return 1;
+			}
 			jobindex = manager.find(jobid);
 		}
 		if(jobindex == -1){
