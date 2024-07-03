@@ -8,7 +8,7 @@ cd -
 cd two args 
 cd too many argumats
 cd no/path
-cd /media/sf_OS/OS_amit_shir/HW1
+cd /media/sf_OS
 pwd
 cd ..
 pwd

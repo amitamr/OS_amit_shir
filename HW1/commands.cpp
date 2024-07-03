@@ -367,7 +367,20 @@ int BgCmd(char* lineSize, Manager& manager)
 	char* cmd;
 	const char* delimiters = " \t\n";
 	char *args[MAX_ARG];
-	if (lineSize[strlen(lineSize)-2] == '&')
+	int end = strlen(lineSize) - 1;
+	//std::cout << "lineSize[end]"<< lineSize[end] << std::endl;
+	while(end > 0 && lineSize[end-1] == ' ')
+	{
+		//std::cout << "end --" << std::endl;
+		end = end -1;
+	}
+	lineSize[end + 1] = '\0';
+	if(end == 0){
+		return 0;
+	}
+	//std::cout << "end " << end << std::endl;
+	//std::cout << "lineSize[end] " << lineSize[end-1] << std::endl; 
+	if (lineSize[end -1 ] == '&')
 	{
 		char cmdName[MAX_LINE_SIZE];
 		strcpy(cmdName, lineSize);
@@ -390,7 +403,6 @@ int BgCmd(char* lineSize, Manager& manager)
 			}
 		}
 		if(is_built_in(cmd)){
-			//std::cout << "line size in bg " << lineSize << std::endl;
 			return -1;		
 		}
 
