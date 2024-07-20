@@ -9,6 +9,7 @@
 #include <ctime>
 #include <unistd.h>
 #include <cstdlib>
+#include <fstream>
 #include "BankAccount.hpp"
 #include "bank.hpp"
 
@@ -17,4 +18,4 @@
 
 
 void* thread_function(void* filename_arg){};
-void openaccount(char* args){};
+//void openaccount(char* args){};

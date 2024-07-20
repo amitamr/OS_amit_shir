@@ -14,13 +14,21 @@ class Account{
     int password;
     int balance;
     int rd_count;
-    pthread_mutex_t bank_acc_lock;
+    bool curr_writing;
+    int wr_wait;
     bool valid;
+    pthread_mutex_t bank_acc_lock;
+    pthread_cond_t acc_rd_cond;
+    pthread_cond_t acc_wr_cond;
 
 
     Account(int account, int new_password, int new_balance); //Constructor
 
     ~Account(); //Distructor
+    void acc_rd_start();
+    void acc_rd_end();
+    void acc_wr_start();
+    void acc_wr_end();
 
 }
 

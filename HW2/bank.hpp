@@ -11,7 +11,8 @@
 #include <ctime> 
 #include <random>
 #include "BankAccount.hpp"
-#include "ATM.hpp"
+#include "atm.hpp"
+
 
 #define SLEEP_ACT_TIME 1
 #define WAKEUP_ATM_TIME 0.1
@@ -41,6 +42,7 @@ class Bank{
     ~Bank(); //Distructor
 
     void addaccount(int account_num, int password, int initial_amount){};
+    void removeaccount(int account_num){};
     void commission(){}; //charges random commission from all accounts every 3 secs
     void printAccounts(){}; //prints all accounts to the screen every half sec
     int findAccount(int account){};
