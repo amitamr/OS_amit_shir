@@ -12,7 +12,7 @@ Bank::~Bank(){
     pthread_mutex_destroy(&bank_lock);
     pthread_cond_destroy(&rd_cond);
     pthread_cond_destroy(&wr_cond);
-};
+}
 
 int Bank::findAccount(int account){
 
@@ -30,7 +30,7 @@ void Bank::addaccount(int account_num, int password, int initial_amount){
 }
 void Bank::removeaccount(int acc_index){
 
-    account.erase(accounts.begin() + acc_index);
+    accounts.erase(accounts.begin() + acc_index);
     accounts_cnt--;
 }
 
@@ -109,13 +109,13 @@ int main(int argc, char *argv[]){
     }
 
     pthread_t commission_thread;
-    if (pthread_create(&commission_thread, NULL, (void*)bank.commission, ??? ) != 0) {
+    if (pthread_create(&commission_thread, NULL, commission , NULL) != 0) {
             perror("Bank error: pthread_create failed");
             return 1;
     }
 
     pthread_t print_acc_thread;
-    if (pthread_create(&print_acc_thread, NULL, (void*)bank.printAccounts, ???) != 0) {
+    if (pthread_create(&print_acc_thread, NULL, printAccounts, NULL) != 0) {
             perror("Bank error: pthread_create failed");
             return 1;
     }
@@ -149,7 +149,7 @@ int main(int argc, char *argv[]){
 }
 
 
-void commission(){
+void* commission(void* args){
     int precentage = rand()% 5 + 1;
     while(1)
     {
@@ -160,12 +160,12 @@ void commission(){
         bank.bank_wr_start();
         for(int i=0; i < bank.accounts_cnt; i++){
             int curr_balance = bank.accounts[i].balance;
-            int comm = static_cast<int> (curr_balance * (precentage/100))
+            int comm = static_cast<int> (curr_balance * (precentage/100));
             bank.bank_balance += comm;
-            bank.accounts[i].balance = balance - comm;
+            bank.accounts[i].balance = curr_balance - comm;
             pthread_mutex_lock(&log_wrt_lck);
             //critical section
-            logfile << "Bank: commissions of " << precentage << " % were charged, bank gained " << comm << " from account " << bank.account[i].acc_num << std::endl;
+            logfile << "Bank: commissions of " << precentage << " % were charged, bank gained " << comm << " from account " << bank.accounts[i].acc_num << std::endl;
             //unlocking mutex
             pthread_mutex_unlock(&log_wrt_lck);
         }
@@ -173,7 +173,7 @@ void commission(){
         sleep(3);
     }
 }
-void printAccounts(){
+void* printAccounts(void* args){
     while(1)
     {
         if(atms_done){

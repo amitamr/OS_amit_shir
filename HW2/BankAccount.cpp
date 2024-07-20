@@ -10,7 +10,7 @@ Account::Account(int account, int new_password, int new_balance) : acc_num(accou
 
 Account::~Account(){}
 
-void BankAccount::acc_rd_start(){
+void Account::acc_rd_start(){
         pthread_mutex_lock(&bank_acc_lock);
         while(curr_writing || wr_wait > 0){ //the logic rd_count != 0 is not included to prevent writer starvation- if there is a writer waiting then stop entering reader
             pthread_cond_wait(&acc_rd_cond, &bank_acc_lock);
@@ -20,7 +20,7 @@ void BankAccount::acc_rd_start(){
         pthread_mutex_unlock(&bank_acc_lock);
     }
 
-    void BankAccount::acc_rd_end(){
+    void Account::acc_rd_end(){
         pthread_mutex_lock(&bank_acc_lock);
         rd_count--;
         if(rd_count == 0){
@@ -29,7 +29,7 @@ void BankAccount::acc_rd_start(){
         pthread_mutex_unlock(&bank_acc_lock);
     }
 
-    void BankAccount::acc_wr_start(){
+    void Account::acc_wr_start(){
         pthread_mutex_lock(&bank_acc_lock);
         wr_wait++;
         while(rd_count > 0 || curr_writing){
@@ -41,7 +41,7 @@ void BankAccount::acc_rd_start(){
         pthread_mutex_unlock(&bank_acc_lock);
     }
 
-    void BankAccount::acc_wr_end(){
+    void Account::acc_wr_end(){
         pthread_mutex_lock(&bank_acc_lock);
         curr_writing = false;
         pthread_cond_broadcast(&acc_rd_cond);

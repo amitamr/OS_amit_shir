@@ -17,5 +17,6 @@
 #define WAKEUP_ATM_TIME 0.1
 
 
-void* thread_function(void* filename_arg){};
+void* thread_function(void* filename_arg);
 //void openaccount(char* args){};
+#endif

@@ -1,19 +1,17 @@
 #include "atm.hpp"
-#include <fstream>
+#define MAX_ARG 5
 
-using namespace std
-#define MAX_ARG 5;
+using namespace std;
 
+extern Bank bank;
+extern pthread_mutex_t log_wrt_lck;
+extern ofstream logfile;
 
 /*Bank bank;
 ofstream logfile;
 pthread_mutex_t log_wrt_lck;*/ 
 
 //data structure for pthread create
-struct atm_data{
-    int thread_id;
-    char* filename;
-}
 
 void* thread_function(void* thread){
     
@@ -21,7 +19,7 @@ void* thread_function(void* thread){
     int args[MAX_ARG];
     const char* delimiters = " \t";
     atm_data* curr_atm = static_cast<atm_data*>(thread);
-    FILE* file = std::fopen(curr_atm.filename , "r");
+    FILE* file = std::fopen(curr_atm->filename , "r");
     
     if (file == nullptr) {
         std::cerr << "Bank error: illigal arguments" << std::endl;
@@ -30,7 +28,7 @@ void* thread_function(void* thread){
 
     // Buffer to hold each line
     char buffer[1024];
-    char action[1024];
+    char* action;
     // Read each line from the file
     while (fgets(buffer, sizeof(buffer), file)) {
         // Remove the newline character from the end of the line, if present
@@ -41,7 +39,7 @@ void* thread_function(void* thread){
         }
         cargs[0] = action;
         args[0] = 0;
-        for (i=1; i<MAX_ARG; i++)
+        for (int i=1; i<MAX_ARG; i++)
         {
             cargs[i] = strtok(NULL, delimiters);
             if (cargs[i] != NULL){
@@ -51,21 +49,21 @@ void* thread_function(void* thread){
 
         if (!strcmp(cargs[0], "O")){
             bank.bank_wr_start(); //to prevent doubling on the bankk account
-            if(findAccount(args[1]) != -1){
+            if(bank.findAccount(args[1]) != -1){
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
                 //critical section
-                logfile << "Error " << thread.thread_id << ": Your transaction failed – account with the same id exists" << std::endl;
+                logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – account with the same id exists" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
                 bank.bank_wr_end();
             }
             else{
-                bank.addaccount(args[1],args[2],args[3]) //call to a function that create a new account - Shir
+                bank.addaccount(args[1],args[2],args[3]); //call to a function that create a new account - Shir
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
                 //critical section
-                logfile << thread.thread_id << ": New account id is " << args[1] << " with password " << args[2] << " and initial balance " << args[3] << std::endl;
+                logfile << curr_atm->thread_id << ": New account id is " << args[1] << " with password " << args[2] << " and initial balance " << args[3] << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
                 bank.bank_wr_end();
@@ -75,12 +73,12 @@ void* thread_function(void* thread){
 
          if (!strcmp(cargs[0], "D")){
             bank.bank_rd_start();
-            int acc_index = findAccount(args[1]);
+            int acc_index = bank.findAccount(args[1]);
             if( acc_index != -1){ //account number does not exist
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
                 //critical section
-                logfile << "Error " << thread.thread_id << ": Your transaction failed – account id " << args[1] << " does not exists" << std::endl;
+                logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – account id " << args[1] << " does not exists" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
                 bank.bank_rd_end();
@@ -89,7 +87,7 @@ void* thread_function(void* thread){
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
                 //critical section
-                logfile << "Error " << thread.thread_id << ": Your transaction failed – password for account id " << args[1] << " is incorrect" << std::endl;
+                logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – password for account id " << args[1] << " is incorrect" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
                 bank.bank_rd_end();
@@ -100,7 +98,7 @@ void* thread_function(void* thread){
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
                 //critical section
-                logfile << thread.thread_id << ": Account " <<  args[1] << " new balance is " << bank.accounts[acc_index].balance << " after " << args[3] << " $ was deposited" << std::endl;
+                logfile << curr_atm->thread_id << ": Account " <<  args[1] << " new balance is " << bank.accounts[acc_index].balance << " after " << args[3] << " $ was deposited" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
                 bank.accounts[acc_index].acc_wr_end(); //unlock the account
@@ -112,12 +110,12 @@ void* thread_function(void* thread){
 
          if (!strcmp(cargs[0], "W")){
             bank.bank_rd_start();
-            int acc_index = findAccount(args[1]);
+            int acc_index = bank.findAccount(args[1]);
             if( acc_index != -1){ //account number does not exist
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
                 //critical section
-                logfile << "Error " << thread.thread_id << ": Your transaction failed – account id " << args[1] << " does not exists" << std::endl;
+                logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – account id " << args[1] << " does not exists" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
                 bank.bank_rd_end();
@@ -126,7 +124,7 @@ void* thread_function(void* thread){
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
                 //critical section
-                logfile << "Error " << thread.thread_id << ": Your transaction failed – password for account id " << args[1] << " is incorrect" << std::endl;
+                logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – password for account id " << args[1] << " is incorrect" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
                 bank.bank_rd_end();
@@ -137,7 +135,7 @@ void* thread_function(void* thread){
                     //locking mutex
                     pthread_mutex_lock(&log_wrt_lck);
                     //critical section
-                    logfile << "Error " << thread.thread_id << ": Your transaction failed – account id " << args[1] << " balance is lower than " << args[3] << std::endl;
+                    logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – account id " << args[1] << " balance is lower than " << args[3] << std::endl;
                     //unlocking mutex
                     pthread_mutex_unlock(&log_wrt_lck);
                 }
@@ -146,7 +144,7 @@ void* thread_function(void* thread){
                     //locking mutex
                     pthread_mutex_lock(&log_wrt_lck);
                     //critical section
-                    logfile << thread.thread_id << ": Account " <<  args[1] << " new balance is " << bank.accounts[acc_index].balance << " after " << args[3] << " $ was withdrawn" << std::endl;
+                    logfile << curr_atm->thread_id << ": Account " <<  args[1] << " new balance is " << bank.accounts[acc_index].balance << " after " << args[3] << " $ was withdrawn" << std::endl;
                     //unlocking mutex
                     pthread_mutex_unlock(&log_wrt_lck);
                 }
@@ -158,12 +156,12 @@ void* thread_function(void* thread){
 
          if (!strcmp(cargs[0], "B")){
             bank.bank_rd_start();
-            int acc_index = findAccount(args[1]);
+            int acc_index = bank.findAccount(args[1]);
             if( acc_index != -1){ //account number does not exist
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
                 //critical section
-                logfile << "Error " << thread.thread_id << ": Your transaction failed – account id " << args[1] << " does not exists" << std::endl;
+                logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – account id " << args[1] << " does not exists" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
                 bank.bank_rd_end();
@@ -172,7 +170,7 @@ void* thread_function(void* thread){
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
                 //critical section
-                logfile << "Error " << thread.thread_id << ": Your transaction failed – password for account id " << args[1] << " is incorrect" << std::endl;
+                logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – password for account id " << args[1] << " is incorrect" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
                 bank.bank_rd_end();
@@ -182,7 +180,7 @@ void* thread_function(void* thread){
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
                 //critical section
-                logfile << thread.thread_id << ": Account " <<  args[1] << " balance is " << bank.accounts[acc_index].balance << std::endl;
+                logfile << curr_atm->thread_id << ": Account " <<  args[1] << " balance is " << bank.accounts[acc_index].balance << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
                 bank.accounts[acc_index].acc_rd_end(); //unlock the account
@@ -193,12 +191,12 @@ void* thread_function(void* thread){
 
         if (!strcmp(cargs[0], "Q")){
             bank.bank_wr_start();
-            int acc_index = findAccount(args[1]);
+            int acc_index = bank.findAccount(args[1]);
             if( acc_index != -1){ //account number does not exist
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
                 //critical section
-                logfile << "Error " << thread.thread_id << ": Your transaction failed – account id " << args[1] << " does not exists" << std::endl;
+                logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – account id " << args[1] << " does not exists" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
                 bank.bank_wr_end();
@@ -207,7 +205,7 @@ void* thread_function(void* thread){
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
                 //critical section
-                logfile << "Error " << thread.thread_id << ": Your transaction failed – password for account id " << args[1] << " is incorrect" << std::endl;
+                logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – password for account id " << args[1] << " is incorrect" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
                 bank.bank_wr_end();
@@ -217,11 +215,11 @@ void* thread_function(void* thread){
                 bank.bank_wr_end();
                 bank.bank_rd_start(); 
                 int old_balance = bank.accounts[acc_index].balance;
-                bank::removeaccount(acc_index); //call to a function that removes an account 
+                bank.removeaccount(acc_index); //call to a function that removes an account 
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
                 //critical section
-                logfile << thread.thread_id << ": Account " <<  args[1] << " is now closed. Balance was " << old_balance << std::endl;
+                logfile << curr_atm->thread_id << ": Account " <<  args[1] << " is now closed. Balance was " << old_balance << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
                 bank.bank_rd_end();
@@ -231,13 +229,13 @@ void* thread_function(void* thread){
 
          if (!strcmp(cargs[0], "T")){
             bank.bank_rd_start();
-            int src_acc_index = findAccount(args[1]);
-            int dest_acc_index = findAccount(args[3]);
+            int src_acc_index = bank.findAccount(args[1]);
+            int dest_acc_index = bank.findAccount(args[3]);
             if(src_acc_index != -1){ //account number does not exist
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
                 //critical section
-                logfile << "Error " << thread.thread_id << ": Your transaction failed – account id " << args[1] << " does not exists" << std::endl;
+                logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – account id " << args[1] << " does not exists" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
                 bank.bank_rd_end();
@@ -246,7 +244,7 @@ void* thread_function(void* thread){
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
                 //critical section
-                logfile << "Error " << thread.thread_id << ": Your transaction failed – account id " << args[3] << " does not exists" << std::endl;
+                logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – account id " << args[3] << " does not exists" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
                 bank.bank_rd_end();
@@ -255,7 +253,7 @@ void* thread_function(void* thread){
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
                 //critical section
-                logfile << "Error " << thread.thread_id << ": Your transaction failed – password for account id " << args[1] << " is incorrect" << std::endl;
+                logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – password for account id " << args[1] << " is incorrect" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
                 bank.bank_rd_end();
@@ -266,7 +264,7 @@ void* thread_function(void* thread){
                     //locking mutex
                     pthread_mutex_lock(&log_wrt_lck);
                     //critical section
-                    logfile << "Error " << thread.thread_id << ": Your transaction failed – account id " << args[1] << " balance is lower than " << args[3] << std::endl;
+                    logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – account id " << args[1] << " balance is lower than " << args[3] << std::endl;
                     //unlocking mutex
                     pthread_mutex_unlock(&log_wrt_lck);
                 }
@@ -277,7 +275,7 @@ void* thread_function(void* thread){
                     //locking mutex
                     pthread_mutex_lock(&log_wrt_lck);
                     //critical section
-                    logfile << thread.thread_id << ": Transfer " <<  args[4] << " from account " << args[1] << " to account " << args[3] <<
+                    logfile << curr_atm->thread_id << ": Transfer " <<  args[4] << " from account " << args[1] << " to account " << args[3] <<
                                                                                 " new account balance is " << bank.accounts[src_acc_index].balance << 
                                                                                 "new target account balance is " << bank.accounts[dest_acc_index].balance 
                                                                                 << std::endl;
@@ -294,7 +292,7 @@ void* thread_function(void* thread){
 	}
 
     pthread_exit(NULL);
-    file.close();
+    fclose(file);
 }
 
 

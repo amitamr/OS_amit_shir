@@ -1,5 +1,5 @@
-#ifndef _ACCOUNT_H
-#define _ACCOUNT_H
+#ifndef _BANKACCOUNT_H
+#define _BANKACCOUNT_H
 #include <iostream>
 #include <vector>
 #include <pthread.h>
@@ -30,5 +30,6 @@ class Account{
     void acc_wr_start();
     void acc_wr_end();
 
-}
+};
 
+#endif

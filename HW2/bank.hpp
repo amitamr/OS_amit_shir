@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <ctime> 
 #include <random>
+#include <fstream>
 #include "BankAccount.hpp"
 #include "atm.hpp"
 
@@ -18,9 +19,13 @@
 #define WAKEUP_ATM_TIME 0.1
 
 
+struct atm_data{
+    int thread_id;
+    char* filename;
+};
 
 class Bank{
-
+public:
     std::vector<Account> accounts;
     //Account Bank_Meta; //bank's secured account
     int bank_balance;
@@ -41,14 +46,17 @@ class Bank{
     Bank(); // Constructor
     ~Bank(); //Distructor
 
-    void addaccount(int account_num, int password, int initial_amount){};
-    void removeaccount(int account_num){};
-    void commission(){}; //charges random commission from all accounts every 3 secs
-    void printAccounts(){}; //prints all accounts to the screen every half sec
-    int findAccount(int account){};
+    void addaccount(int account_num, int password, int initial_amount);
+    void removeaccount(int account_num);
+    int findAccount(int account);
     void bank_rd_start();
     void bank_rd_end();
     void bank_wr_start();
     void bank_wr_end();
 
-}
+};
+
+void* commission(void* args); //charges random commission from all accounts every 3 secs
+void* printAccounts(void* args); //prints all accounts to the screen every half sec
+
+#endif
