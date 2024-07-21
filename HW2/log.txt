@@ -1,0 +1,24 @@
+3: New account id is 1001 with password 1111 and initial balance 5000
+2: New account id is 3333 with password 4321 and initial balance 1500
+Error 1: Your transaction failed – account with the same id exists
+2: Account 3333 new balance is 2000 after 500 $ was deposited
+3: Account 1001 new balance is 5500 after 500 $ was deposited
+1: New account id is 1111 with password 1234 and initial balance 1000
+3: Account 1001 new balance is 1000 after 4500 $ was withdrawn
+Error 1: Your transaction failed – password for account id 1111 is incorrect
+Error 2: Your transaction failed – password for account id 3333 is incorrect
+Bank: commissions of 2 % were charged, bank gained 20 from account 1001
+Bank: commissions of 2 % were charged, bank gained 40 from account 3333
+Bank: commissions of 2 % were charged, bank gained 20 from account 1111
+Error 1: Your transaction failed – password for account id 1111 is incorrect
+2: Account 3333 balance is 1960
+3: New account id is 1002 with password 2222 and initial balance 1000
+1: Account 1111 balance is 980
+Error 2: Your transaction failed – password for account id 3333 is incorrect
+Error 3: Your transaction failed – account id 1002 balance is lower than 1500
+Error 2: Your transaction failed – account id 4444 does not exists
+Error 1: Your transaction failed – account id 4444 does not exists
+Bank: commissions of 3 % were charged, bank gained 29 from account 1001
+Bank: commissions of 3 % were charged, bank gained 58 from account 3333
+Bank: commissions of 3 % were charged, bank gained 29 from account 1111
+Bank: commissions of 3 % were charged, bank gained 30 from account 1002

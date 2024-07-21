@@ -2,13 +2,17 @@
 
 
 Account::Account(int account, int new_password, int new_balance) : acc_num(account), password(new_password), balance(new_balance),
-                                                                   rd_count (0), curr_writing(0), wr_wait(0), valid(1){
+                                                                   rd_count (0), curr_writing(false), wr_wait(0), valid(true){
     pthread_mutex_init(&bank_acc_lock, NULL);
     pthread_cond_init(&acc_rd_cond, NULL);
     pthread_cond_init(&acc_wr_cond, NULL);
 }
 
-Account::~Account(){}
+Account::~Account(){
+    pthread_mutex_destroy(&bank_acc_lock);
+    pthread_cond_destroy(&acc_rd_cond);
+    pthread_cond_destroy(&acc_wr_cond);
+}
 
 void Account::acc_rd_start(){
         pthread_mutex_lock(&bank_acc_lock);

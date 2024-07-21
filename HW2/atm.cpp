@@ -48,7 +48,7 @@ void* thread_function(void* thread){
         }
 
         if (!strcmp(cargs[0], "O")){
-            bank.bank_wr_start(); //to prevent doubling on the bankk account
+            bank.bank_wr_start(); //to prevent doubling on the bank account
             if(bank.findAccount(args[1]) != -1){
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
@@ -59,11 +59,14 @@ void* thread_function(void* thread){
                 bank.bank_wr_end();
             }
             else{
-                bank.addaccount(args[1],args[2],args[3]); //call to a function that create a new account - Shir
+                bank.addaccount(args[1],args[2],args[3]); //call to a function that create a new account
+               // int index_for_print = bank.findAccount(args[1]);
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
                 //critical section
                 logfile << curr_atm->thread_id << ": New account id is " << args[1] << " with password " << args[2] << " and initial balance " << args[3] << std::endl;
+                //logfile << "print index " << index_for_print << " acc num " << bank.accounts[index_for_print].acc_num << 
+                //   " balance " << bank.accounts[index_for_print].balance << " valid " << bank.accounts[index_for_print].valid << endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
                 bank.bank_wr_end();
@@ -74,7 +77,7 @@ void* thread_function(void* thread){
          if (!strcmp(cargs[0], "D")){
             bank.bank_rd_start();
             int acc_index = bank.findAccount(args[1]);
-            if( acc_index != -1){ //account number does not exist
+            if(acc_index == -1){ //account number does not exist
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
                 //critical section
@@ -111,7 +114,7 @@ void* thread_function(void* thread){
          if (!strcmp(cargs[0], "W")){
             bank.bank_rd_start();
             int acc_index = bank.findAccount(args[1]);
-            if( acc_index != -1){ //account number does not exist
+            if( acc_index == -1){ //account number does not exist
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
                 //critical section
@@ -157,7 +160,7 @@ void* thread_function(void* thread){
          if (!strcmp(cargs[0], "B")){
             bank.bank_rd_start();
             int acc_index = bank.findAccount(args[1]);
-            if( acc_index != -1){ //account number does not exist
+            if( acc_index == -1){ //account number does not exist
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
                 //critical section
@@ -192,7 +195,7 @@ void* thread_function(void* thread){
         if (!strcmp(cargs[0], "Q")){
             bank.bank_wr_start();
             int acc_index = bank.findAccount(args[1]);
-            if( acc_index != -1){ //account number does not exist
+            if( acc_index == -1){ //account number does not exist
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
                 //critical section
@@ -211,7 +214,7 @@ void* thread_function(void* thread){
                 bank.bank_wr_end();
             }
             else{
-                bank.accounts[acc_index].valid = 0;
+                bank.accounts[acc_index].valid = false;
                 bank.bank_wr_end();
                 bank.bank_rd_start(); 
                 int old_balance = bank.accounts[acc_index].balance;
@@ -231,7 +234,7 @@ void* thread_function(void* thread){
             bank.bank_rd_start();
             int src_acc_index = bank.findAccount(args[1]);
             int dest_acc_index = bank.findAccount(args[3]);
-            if(src_acc_index != -1){ //account number does not exist
+            if(src_acc_index == -1){ //account number does not exist
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
                 //critical section
@@ -240,7 +243,7 @@ void* thread_function(void* thread){
                 pthread_mutex_unlock(&log_wrt_lck);
                 bank.bank_rd_end();
             }
-            else if(dest_acc_index != -1){ //account number does not exist
+            else if(dest_acc_index == -1){ //account number does not exist
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
                 //critical section

@@ -15,9 +15,8 @@ Bank::~Bank(){
 }
 
 int Bank::findAccount(int account){
-
     for(int i = 0; i < accounts_cnt; i ++){
-        if (accounts[i].acc_num == account && accounts[i].valid == 1){
+        if ((accounts[i].acc_num == account) && (accounts[i].valid == true)){
             return i;
         }
     }
@@ -29,7 +28,6 @@ void Bank::addaccount(int account_num, int password, int initial_amount){
     accounts_cnt++;
 }
 void Bank::removeaccount(int acc_index){
-
     accounts.erase(accounts.begin() + acc_index);
     accounts_cnt--;
 }
@@ -100,7 +98,7 @@ int main(int argc, char *argv[]){
         atm->filename = new char[strlen(argv[i+1]) + 1];
         //filename = new char[strlen(argv[i+1]+1)];
         strcpy(atm->filename, argv[i+1]);
-        atm->thread_id = i;
+        atm->thread_id = i+1;
         all_atms.push_back(atm);
         if (pthread_create(&atms[i], NULL, thread_function, atm) != 0) {
             perror("Bank error: pthread_create failed");
@@ -150,17 +148,18 @@ int main(int argc, char *argv[]){
 
 
 void* commission(void* args){
-    int precentage = rand()% 5 + 1;
     while(1)
     {
         if(atms_done){
             pthread_exit(NULL);
             break;
         }
+        srand(static_cast<unsigned int>(time(nullptr)));
+        int precentage = (rand()% 5) + 1;
         bank.bank_wr_start();
         for(int i=0; i < bank.accounts_cnt; i++){
             int curr_balance = bank.accounts[i].balance;
-            int comm = static_cast<int> (curr_balance * (precentage/100));
+            int comm = static_cast<int>(curr_balance * (precentage/100.00));
             bank.bank_balance += comm;
             bank.accounts[i].balance = curr_balance - comm;
             pthread_mutex_lock(&log_wrt_lck);
