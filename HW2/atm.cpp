@@ -48,7 +48,7 @@ void* thread_function(void* thread){
         }
 
         if (!strcmp(cargs[0], "O")){
-            bank.bank_wr_start(); //to prevent doubling on the bank account
+            bank.bank_wr_start(curr_atm->thread_id); //to prevent doubling on the bank account
             if(bank.findAccount(args[1]) != -1){
                 //locking mutex
                 pthread_mutex_lock(&log_wrt_lck);
@@ -56,7 +56,7 @@ void* thread_function(void* thread){
                 logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – account with the same id exists" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
-                bank.bank_wr_end();
+                bank.bank_wr_end(curr_atm->thread_id);
             }
             else{
                 bank.addaccount(args[1],args[2],args[3]); //call to a function that create a new account
@@ -69,13 +69,13 @@ void* thread_function(void* thread){
                 //   " balance " << bank.accounts[index_for_print].balance << " valid " << bank.accounts[index_for_print].valid << endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
-                bank.bank_wr_end();
+                bank.bank_wr_end(curr_atm->thread_id);
             }
             sleep(ACT_TIME);
         }
 
          if (!strcmp(cargs[0], "D")){
-            bank.bank_rd_start();
+            bank.bank_rd_start(curr_atm->thread_id);
             int acc_index = bank.findAccount(args[1]);
             if(acc_index == -1){ //account number does not exist
                 //locking mutex
@@ -84,7 +84,7 @@ void* thread_function(void* thread){
                 logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – account id " << args[1] << " does not exists" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
-                bank.bank_rd_end();
+                bank.bank_rd_end(curr_atm->thread_id);
             }
             else if(bank.accounts[acc_index].password != args[2]){
                 //locking mutex
@@ -93,7 +93,7 @@ void* thread_function(void* thread){
                 logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – password for account id " << args[1] << " is incorrect" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
-                bank.bank_rd_end();
+                bank.bank_rd_end(curr_atm->thread_id);
             }  
             else{
                 bank.accounts[acc_index].acc_wr_start(); //lock the account for only one writer
@@ -105,14 +105,14 @@ void* thread_function(void* thread){
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
                 bank.accounts[acc_index].acc_wr_end(); //unlock the account
-                bank.bank_rd_end();
+                bank.bank_rd_end(curr_atm->thread_id);
 
             }
             sleep(ACT_TIME);
         }
 
          if (!strcmp(cargs[0], "W")){
-            bank.bank_rd_start();
+            bank.bank_rd_start(curr_atm->thread_id);
             int acc_index = bank.findAccount(args[1]);
             if( acc_index == -1){ //account number does not exist
                 //locking mutex
@@ -121,7 +121,7 @@ void* thread_function(void* thread){
                 logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – account id " << args[1] << " does not exists" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
-                bank.bank_rd_end();
+                bank.bank_rd_end(curr_atm->thread_id);
             }
             else if(bank.accounts[acc_index].password != args[2]){
                 //locking mutex
@@ -130,7 +130,7 @@ void* thread_function(void* thread){
                 logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – password for account id " << args[1] << " is incorrect" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
-                bank.bank_rd_end();
+                bank.bank_rd_end(curr_atm->thread_id);
             }  
             else {
                 bank.accounts[acc_index].acc_wr_start(); //lock the account for only one writer
@@ -152,13 +152,13 @@ void* thread_function(void* thread){
                     pthread_mutex_unlock(&log_wrt_lck);
                 }
                 bank.accounts[acc_index].acc_wr_end(); //unlock the account
-                bank.bank_rd_end();
+                bank.bank_rd_end(curr_atm->thread_id);
             }
             sleep(ACT_TIME);
         }
 
          if (!strcmp(cargs[0], "B")){
-            bank.bank_rd_start();
+            bank.bank_rd_start(curr_atm->thread_id);
             int acc_index = bank.findAccount(args[1]);
             if( acc_index == -1){ //account number does not exist
                 //locking mutex
@@ -167,7 +167,7 @@ void* thread_function(void* thread){
                 logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – account id " << args[1] << " does not exists" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
-                bank.bank_rd_end();
+                bank.bank_rd_end(curr_atm->thread_id);
             }
             else if(bank.accounts[acc_index].password != args[2]){
                 //locking mutex
@@ -176,7 +176,7 @@ void* thread_function(void* thread){
                 logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – password for account id " << args[1] << " is incorrect" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
-                bank.bank_rd_end();
+                bank.bank_rd_end(curr_atm->thread_id);
             }  
             else{
                 bank.accounts[acc_index].acc_rd_start(); //lock the account for readers
@@ -187,13 +187,13 @@ void* thread_function(void* thread){
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
                 bank.accounts[acc_index].acc_rd_end(); //unlock the account
-                bank.bank_rd_end();
+                bank.bank_rd_end(curr_atm->thread_id);
             }
             sleep(ACT_TIME);
         }
 
         if (!strcmp(cargs[0], "Q")){
-            bank.bank_wr_start();
+            bank.bank_wr_start(curr_atm->thread_id);
             int acc_index = bank.findAccount(args[1]);
             if( acc_index == -1){ //account number does not exist
                 //locking mutex
@@ -202,7 +202,7 @@ void* thread_function(void* thread){
                 logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – account id " << args[1] << " does not exists" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
-                bank.bank_wr_end();
+                bank.bank_wr_end(curr_atm->thread_id);
             }
             else if(bank.accounts[acc_index].password != args[2]){
                 //locking mutex
@@ -211,12 +211,12 @@ void* thread_function(void* thread){
                 logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – password for account id " << args[1] << " is incorrect" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
-                bank.bank_wr_end();
+                bank.bank_wr_end(curr_atm->thread_id);
             }
             else{
                 bank.accounts[acc_index].valid = false;
-                bank.bank_wr_end();
-                bank.bank_rd_start(); 
+                bank.bank_wr_end(curr_atm->thread_id);
+                bank.bank_rd_start(curr_atm->thread_id); 
                 int old_balance = bank.accounts[acc_index].balance;
                 bank.removeaccount(acc_index); //call to a function that removes an account 
                 //locking mutex
@@ -225,13 +225,13 @@ void* thread_function(void* thread){
                 logfile << curr_atm->thread_id << ": Account " <<  args[1] << " is now closed. Balance was " << old_balance << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
-                bank.bank_rd_end();
+                bank.bank_rd_end(curr_atm->thread_id);
             }
             sleep(ACT_TIME);
         }
 
          if (!strcmp(cargs[0], "T")){
-            bank.bank_rd_start();
+            bank.bank_rd_start(curr_atm->thread_id);
             int src_acc_index = bank.findAccount(args[1]);
             int dest_acc_index = bank.findAccount(args[3]);
             if(src_acc_index == -1){ //account number does not exist
@@ -241,7 +241,7 @@ void* thread_function(void* thread){
                 logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – account id " << args[1] << " does not exists" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
-                bank.bank_rd_end();
+                bank.bank_rd_end(curr_atm->thread_id);
             }
             else if(dest_acc_index == -1){ //account number does not exist
                 //locking mutex
@@ -250,7 +250,7 @@ void* thread_function(void* thread){
                 logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – account id " << args[3] << " does not exists" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
-                bank.bank_rd_end();
+                bank.bank_rd_end(curr_atm->thread_id);
             }
             else if(bank.accounts[src_acc_index].password != args[2]){
                 //locking mutex
@@ -259,7 +259,7 @@ void* thread_function(void* thread){
                 logfile << "Error " << curr_atm->thread_id << ": Your transaction failed – password for account id " << args[1] << " is incorrect" << std::endl;
                 //unlocking mutex
                 pthread_mutex_unlock(&log_wrt_lck);
-                bank.bank_rd_end();
+                bank.bank_rd_end(curr_atm->thread_id);
             }  
             else{
                 bank.accounts[src_acc_index].acc_wr_start(); //lock the account for only one writer
@@ -287,7 +287,7 @@ void* thread_function(void* thread){
                     bank.accounts[dest_acc_index].acc_wr_end(); //lock the account for only one writer
                 }
                 bank.accounts[src_acc_index].acc_wr_end(); //lock the account for only one writer
-                bank.bank_rd_end();
+                bank.bank_rd_end(curr_atm->thread_id);
             }
             sleep(ACT_TIME);
         }
