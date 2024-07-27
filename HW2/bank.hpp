@@ -49,14 +49,16 @@ public:
     void addaccount(int account_num, int password, int initial_amount);
     void removeaccount(int account_num);
     int findAccount(int account);
-    void bank_rd_start();
-    void bank_rd_end();
-    void bank_wr_start();
-    void bank_wr_end();
+    void bank_rd_start(int thread_id);
+    void bank_rd_end(int thread_id);
+    void bank_wr_start(int thread_id);
+    void bank_wr_end(int thread_id);
 
 };
 
 void* commission(void* args); //charges random commission from all accounts every 3 secs
 void* printAccounts(void* args); //prints all accounts to the screen every half sec
+bool compareByAccID(const Account &a, const Account &b);
+
 
 #endif

@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <string> 
 #include <cstring>
+#include <cstdlib>
+#include <fstream>
 
 class Account{
     public:
@@ -25,10 +27,10 @@ class Account{
     Account(int account, int new_password, int new_balance); //Constructor
 
     ~Account(); //Distructor
-    void acc_rd_start();
-    void acc_rd_end();
-    void acc_wr_start();
-    void acc_wr_end();
+    void acc_rd_start(int thread_id, int acc_num);
+    void acc_rd_end(int thread_id, int acc_num);
+    void acc_wr_start(int thread_id, int acc_num);
+    void acc_wr_end(int thread_id, int acc_num);
 
 };
 

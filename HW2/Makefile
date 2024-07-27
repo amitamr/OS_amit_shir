@@ -1,6 +1,7 @@
 
 CC = g++
-CXXFLAGS = -g -Wall -std=c++11 -Werror -pedantic-errors -DNDEBUG
+CXXFLAGS = -g -Wall -std=c++11 -Werror -fsanitize=thread -pedantic-errors -DNDEBUG
+LDFLAGS = -fsanitize=thread
 CCLINK = $(CC)
 OBJS = bank.o atm.o BankAccount.o
 TARGET = Bank
@@ -8,7 +9,7 @@ RM = rm -f
 
 # Creating the executable
 $(TARGET): $(OBJS)
-	$(CCLINK) -o $(TARGET) $(OBJS) -pthread
+	$(CCLINK) $(LDFLAGS) -o $(TARGET) $(OBJS) -pthread
 
 # Creating the object files
 atm.o: atm.cpp atm.hpp
