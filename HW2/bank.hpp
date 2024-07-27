@@ -58,7 +58,6 @@ public:
 
 void* commission(void* args); //charges random commission from all accounts every 3 secs
 void* printAccounts(void* args); //prints all accounts to the screen every half sec
-bool compareByAccID(const Account &a, const Account &b);
 
 
 #endif
